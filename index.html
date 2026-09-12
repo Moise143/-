@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Vérificateur de numéros bannis</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; }
+        textarea { width: 100%; height: 120px; }
+        button { padding: 10px 20px; margin-top: 10px; cursor: pointer; }
+        .banni { color: red; font-weight: bold; }
+        .ok { color: green; }
+        li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <h1>Vérificateur de numéros bannis</h1>
+    <p>Entrez un numéro par ligne (format international, ex : +33612345678) :</p>
+    <textarea id="numeros" placeholder="+33612345678&#10;+33798765432"></textarea>
+    <br>
+    <button onclick="checker()">Vérifier</button>
+
+    <h2>Résultats :</h2>
+    <ul id="resultats"></ul>
+
+    <script>
+        async function checker() {
+            const lignes = document.getElementById('numeros').value
+                .split('\n').map(l => l.trim()).filter(Boolean);
+
+            const res = await fetch('/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numeros: lignes })
+            });
+            const data = await res.json();
+
+            document.getElementById('resultats').innerHTML = data.resultats
+                .map(r => `<li>${r.numero} : <span class="${r.banni ? 'banni' : 'ok'}">${r.banni ? 'BANNI' : 'Non banni'}</span></li>`)
+                .join('');
+        }
+    </script>
+</body>
+</html>
